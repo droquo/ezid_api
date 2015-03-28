@@ -1,12 +1,12 @@
-import urllib2
+import urllib.request
 from datetime import datetime
 import re
 from os.path import join
 
-version = '0.2'
+version = '0.3'
 apiVersion = 'EZID API, Version 2'
 
-secureServer = "https://n2t.net/ezid"
+secureServer = "https://ezid.cdlib.org"
 testUsername = 'apitest'
 testPassword = 'apitest'
 schemes = {'ark': 'ark:/', 'doi': "doi:"}
@@ -14,7 +14,7 @@ private = "reserved"
 public = "public"
 unavail = "unavailable"
 testShoulder = {schemes['ark'] : '99999/fk4', schemes['doi'] : '10.5072/FK2'}
-testMetadata = {'_target': 'http://example.org/opensociety', 'erc.who': 'Karl Popper', 'erc.what': 'The Open Society and Its Enemies', 'erc.when' : '1945'}
+testMetadata = {'_target': 'http://example.org/nachocheese', '_profile': 'datacite', 'datacite.creator': 'Macho the Nacho', 'datacite.title': 'the nacho cheese diaries', 'datacite.publishedyear' : '2012'}
 
 
 class ApiSession ():
@@ -29,9 +29,9 @@ class ApiSession ():
             self.test = True
         else:
             self.test = False
-        authHandler = urllib2.HTTPBasicAuthHandler()
+        authHandler = urllib.request.HTTPBasicAuthHandler()
         authHandler.add_password("EZID", secureServer, username, password)
-        self.opener = urllib2.build_opener(authHandler)
+        self.opener = urllib.request.build_opener(authHandler)
         # TODO: check login before returning?
         # TODO: what happens if no connection?
         self.setScheme(scheme[0:3])
@@ -188,6 +188,7 @@ class ApiSession ():
     
     def __parseRecord(self, ezidResponse):
         record = {}
+        ezidResponse = ezidResponse.decode('utf-8') #since python3 Type str doesn't support the buffer API
         parts = ezidResponse.split('\n')
         # first item is 'success: [identifier]'
         identifier = parts[0].split(': ')[1]
@@ -208,13 +209,12 @@ class ApiSession ():
 
 
     def __callApi(self, requestUri, requestMethod, requestData):
-        request = urllib2.Request(requestUri)
+        request = urllib.request.Request(requestUri, data=requestData)
         request.get_method = requestMethod
         request.add_header("Content-Type", "text/plain; charset=UTF-8")
-        request.add_data(requestData)
         try:
             response = self.__parseRecord(self.opener.open(request).read())
-        except urllib2.HTTPError as e:
+        except urllib.request.HTTPError as e:
             response = e.read()
 
         return response

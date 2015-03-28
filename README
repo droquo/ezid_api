@@ -1,6 +1,6 @@
-ezid.py - 0.2
+ezid.py - 0.3
 
-API tools for EZID API (http://n2t.net/ezid/). 
+API tools for EZID API (http://ezid.cdlib.org/). 
 
 Start an API session with ezid_api.ApiSession(username, password, scheme, naa). If no username and password are provided, the ezid test api account is used. 
 testArk = ezid_api.ApiSession()
